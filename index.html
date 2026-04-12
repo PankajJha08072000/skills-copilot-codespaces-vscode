@@ -84,6 +84,14 @@
           <div id="projectList" class="dynamic-list"></div>
         </div>
 
+        <div class="builder-section">
+          <div class="section-header">
+            <h3>Certifications</h3>
+            <button id="addCertification" class="btn btn-small">+ Add</button>
+          </div>
+          <div id="certificationList" class="dynamic-list"></div>
+        </div>
+
         <label class="full-width">
           Skills (comma-separated)
           <input id="skills" type="text" placeholder="TypeScript, UX Research, Node.js, Leadership" />
@@ -168,6 +176,10 @@
               <h4>Projects</h4>
               <div id="pProjects" class="entry-list"></div>
             </section>
+            <section>
+              <h4>Certifications</h4>
+              <div id="pCertifications" class="entry-list"></div>
+            </section>
           </div>
         </article>
       </section>
@@ -209,6 +221,19 @@
         <label>Stack / Link <input class="org" type="text" placeholder="React, Python, SQL | github.com/..." /></label>
         <label>Timeline <input class="duration" type="text" placeholder="Q1 2026" /></label>
         <label>Impact <textarea class="desc" rows="3" placeholder="Reduced planning cycle by 25%..."></textarea></label>
+      </div>
+    </template>
+
+    <template id="certificationTemplate">
+      <div class="card-item">
+        <div class="card-head">
+          <strong>Certification Item</strong>
+          <button class="btn btn-danger remove">Remove</button>
+        </div>
+        <label>Certification <input class="title" type="text" placeholder="AWS Certified Solutions Architect" /></label>
+        <label>Issuer <input class="org" type="text" placeholder="Amazon Web Services" /></label>
+        <label>Year / Validity <input class="duration" type="text" placeholder="2025 | Valid till 2028" /></label>
+        <label>Credential / Notes <textarea class="desc" rows="3" placeholder="Credential ID, verification URL, score..."></textarea></label>
       </div>
     </template>
 

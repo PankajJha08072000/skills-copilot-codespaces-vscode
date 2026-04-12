@@ -32,13 +32,15 @@ const preview = {
   skills: document.getElementById("pSkills"),
   experience: document.getElementById("pExperience"),
   education: document.getElementById("pEducation"),
-  projects: document.getElementById("pProjects")
+  projects: document.getElementById("pProjects"),
+  certifications: document.getElementById("pCertifications")
 };
 
 const lists = {
   experience: document.getElementById("experienceList"),
   education: document.getElementById("educationList"),
-  projects: document.getElementById("projectList")
+  projects: document.getElementById("projectList"),
+  certifications: document.getElementById("certificationList")
 };
 
 const defaults = {
@@ -205,6 +207,7 @@ function syncPreview() {
   const experienceData = getCardData(lists.experience);
   const educationData = getCardData(lists.education);
   const projectData = getCardData(lists.projects);
+  const certificationData = getCardData(lists.certifications);
 
   preview.name.textContent = fields.name.value.trim() || defaults.name;
   preview.headline.textContent = fields.headline.value.trim() || defaults.headline;
@@ -235,6 +238,7 @@ function syncPreview() {
   renderEntries(preview.experience, experienceData, "No experience added yet.");
   renderEntries(preview.education, educationData, "No education added yet.");
   renderEntries(preview.projects, projectData, "No projects added yet.");
+  renderEntries(preview.certifications, certificationData, "No certifications added yet.");
 
   updateReadinessScore(experienceData, projectData);
 
@@ -256,7 +260,11 @@ function bindCardEvents(card) {
 }
 
 function addCard(type, initial = {}, skipSync = false) {
-  const templateId = type === "projects" ? "projectTemplate" : `${type}Template`;
+  const templateId = type === "projects"
+    ? "projectTemplate"
+    : type === "certifications"
+      ? "certificationTemplate"
+      : `${type}Template`;
   const template = document.getElementById(templateId);
   const card = template.content.firstElementChild.cloneNode(true);
 
@@ -318,7 +326,8 @@ function gatherState() {
     },
     experience: getCardData(lists.experience),
     education: getCardData(lists.education),
-    projects: getCardData(lists.projects)
+    projects: getCardData(lists.projects),
+    certifications: getCardData(lists.certifications)
   };
 }
 
@@ -332,6 +341,7 @@ function restore() {
     addCard("experience");
     addCard("education");
     addCard("projects");
+    addCard("certifications");
     return;
   }
 
@@ -344,7 +354,7 @@ function restore() {
       }
     });
 
-    ["experience", "education", "projects"].forEach((type) => {
+    ["experience", "education", "projects", "certifications"].forEach((type) => {
       lists[type].innerHTML = "";
       const entries = sanitizeEntries(Array.isArray(data[type]) ? data[type] : []);
       if (!entries.length) {
@@ -359,6 +369,7 @@ function restore() {
     addCard("experience");
     addCard("education");
     addCard("projects");
+    addCard("certifications");
   }
 }
 
@@ -384,6 +395,7 @@ function resetAll() {
   addCard("experience");
   addCard("education");
   addCard("projects");
+  addCard("certifications");
   syncPreview();
 }
 
@@ -409,6 +421,7 @@ function printResume(onePage = false) {
 document.getElementById("addExperience").addEventListener("click", () => addCard("experience"));
 document.getElementById("addEducation").addEventListener("click", () => addCard("education"));
 document.getElementById("addProject").addEventListener("click", () => addCard("projects"));
+document.getElementById("addCertification").addEventListener("click", () => addCard("certifications"));
 
 document.getElementById("downloadBtn").addEventListener("click", () => printResume(false));
 document.getElementById("onePageBtn").addEventListener("click", () => printResume(true));
