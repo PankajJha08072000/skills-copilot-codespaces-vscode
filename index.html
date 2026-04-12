@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaResume Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <header class="topbar">
+      <h1>NovaResume Builder</h1>
+      <div class="topbar-actions">
+        <button id="downloadBtn" class="btn btn-primary">Print / Save PDF</button>
+        <button id="clearBtn" class="btn btn-ghost">Clear All</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel form-panel">
+        <h2>Resume Input</h2>
+
+        <div class="field-grid">
+          <label>
+            Full Name
+            <input id="name" type="text" placeholder="Jordan Avery" />
+          </label>
+          <label>
+            Role / Headline
+            <input id="headline" type="text" placeholder="Senior Product Designer" />
+          </label>
+          <label>
+            Email
+            <input id="email" type="email" placeholder="you@example.com" />
+          </label>
+          <label>
+            Phone
+            <input id="phone" type="text" placeholder="+1 555 123 4567" />
+          </label>
+          <label>
+            Location
+            <input id="location" type="text" placeholder="Austin, TX" />
+          </label>
+          <label>
+            Website / Portfolio
+            <input id="website" type="text" placeholder="https://portfolio.dev" />
+          </label>
+        </div>
+
+        <label class="full-width">
+          Professional Summary
+          <textarea id="summary" rows="4" placeholder="Write a concise, impact-focused summary..."></textarea>
+        </label>
+
+        <div class="builder-section">
+          <div class="section-header">
+            <h3>Experience</h3>
+            <button id="addExperience" class="btn btn-small">+ Add</button>
+          </div>
+          <div id="experienceList" class="dynamic-list"></div>
+        </div>
+
+        <div class="builder-section">
+          <div class="section-header">
+            <h3>Education</h3>
+            <button id="addEducation" class="btn btn-small">+ Add</button>
+          </div>
+          <div id="educationList" class="dynamic-list"></div>
+        </div>
+
+        <div class="builder-section">
+          <div class="section-header">
+            <h3>Projects</h3>
+            <button id="addProject" class="btn btn-small">+ Add</button>
+          </div>
+          <div id="projectList" class="dynamic-list"></div>
+        </div>
+
+        <label class="full-width">
+          Skills (comma-separated)
+          <input id="skills" type="text" placeholder="TypeScript, UX Research, Node.js, Leadership" />
+        </label>
+
+        <div class="builder-section">
+          <h3>Theme Settings</h3>
+          <div class="field-grid">
+            <label>
+              Accent Color
+              <input id="accent" type="color" value="#0f9d8c" />
+            </label>
+            <label>
+              Layout Style
+              <select id="layoutMode">
+                <option value="split">Split Sidebar</option>
+                <option value="single">Single Column</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel preview-panel">
+        <h2>Live Preview</h2>
+        <article id="resume" class="resume split" aria-live="polite">
+          <aside class="resume-sidebar">
+            <div class="identity-block">
+              <h3 id="pName">Your Name</h3>
+              <p id="pHeadline">Your Role</p>
+            </div>
+            <div class="meta-block">
+              <p id="pEmail">email@example.com</p>
+              <p id="pPhone">+1 000 000 0000</p>
+              <p id="pLocation">City, Country</p>
+              <p id="pWebsite">your-site.com</p>
+            </div>
+            <section>
+              <h4>Skills</h4>
+              <ul id="pSkills" class="chip-list"></ul>
+            </section>
+          </aside>
+
+          <div class="resume-main">
+            <section>
+              <h4>Summary</h4>
+              <p id="pSummary">Your summary appears here.</p>
+            </section>
+            <section>
+              <h4>Experience</h4>
+              <div id="pExperience" class="entry-list"></div>
+            </section>
+            <section>
+              <h4>Education</h4>
+              <div id="pEducation" class="entry-list"></div>
+            </section>
+            <section>
+              <h4>Projects</h4>
+              <div id="pProjects" class="entry-list"></div>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <template id="experienceTemplate">
+      <div class="card-item">
+        <div class="card-head">
+          <strong>Experience Item</strong>
+          <button class="btn btn-danger remove">Remove</button>
+        </div>
+        <label>Title <input class="title" type="text" placeholder="Lead Engineer" /></label>
+        <label>Company <input class="org" type="text" placeholder="Acme Labs" /></label>
+        <label>Duration <input class="duration" type="text" placeholder="2022 - Present" /></label>
+        <label>Description <textarea class="desc" rows="3" placeholder="Delivered outcomes, led initiatives..."></textarea></label>
+      </div>
+    </template>
+
+    <template id="educationTemplate">
+      <div class="card-item">
+        <div class="card-head">
+          <strong>Education Item</strong>
+          <button class="btn btn-danger remove">Remove</button>
+        </div>
+        <label>Degree <input class="title" type="text" placeholder="B.S. Computer Science" /></label>
+        <label>School <input class="org" type="text" placeholder="State University" /></label>
+        <label>Duration <input class="duration" type="text" placeholder="2017 - 2021" /></label>
+        <label>Notes <textarea class="desc" rows="3" placeholder="Honors, GPA, coursework..."></textarea></label>
+      </div>
+    </template>
+
+    <template id="projectTemplate">
+      <div class="card-item">
+        <div class="card-head">
+          <strong>Project Item</strong>
+          <button class="btn btn-danger remove">Remove</button>
+        </div>
+        <label>Project Name <input class="title" type="text" placeholder="Revenue Forecasting Tool" /></label>
+        <label>Stack / Link <input class="org" type="text" placeholder="React, Python, SQL | github.com/..." /></label>
+        <label>Timeline <input class="duration" type="text" placeholder="Q1 2026" /></label>
+        <label>Impact <textarea class="desc" rows="3" placeholder="Reduced planning cycle by 25%..."></textarea></label>
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
