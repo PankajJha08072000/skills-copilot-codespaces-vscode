@@ -59,6 +59,7 @@ h4 {
 .topbar-actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .layout {
@@ -363,8 +364,27 @@ select:focus {
 }
 
 @media (max-width: 980px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .topbar-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
   .layout {
     grid-template-columns: 1fr;
+    padding: 0.75rem;
   }
 
   .form-panel {
@@ -381,6 +401,33 @@ select:focus {
 
   .field-grid {
     grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 0.8rem;
+    border-radius: 14px;
+  }
+
+  .resume {
+    min-height: auto;
+  }
+
+  .resume-main {
+    padding: 0.95rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .btn {
+    padding: 0.52rem 0.72rem;
+  }
+
+  .identity-block h3 {
+    font-size: 1.2rem;
   }
 }
 

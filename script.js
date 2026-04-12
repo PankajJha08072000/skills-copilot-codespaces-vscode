@@ -394,7 +394,16 @@ function printResume(onePage = false) {
     resumeEl.classList.remove("one-page-mode");
   }
 
-  window.print();
+  const runPrint = () => {
+    if (typeof window.print === "function") {
+      window.print();
+    }
+  };
+
+  // Mobile browsers often need a short delay so layout classes are applied before opening print UI.
+  requestAnimationFrame(() => {
+    setTimeout(runPrint, 150);
+  });
 }
 
 document.getElementById("addExperience").addEventListener("click", () => addCard("experience"));
