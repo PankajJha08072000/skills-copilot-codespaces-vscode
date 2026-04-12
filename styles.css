@@ -385,11 +385,13 @@ select:focus {
 }
 
 @media print {
-  body,
-  .panel,
-  .resume {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
     background: white !important;
-    box-shadow: none !important;
   }
 
   .topbar,
@@ -407,11 +409,30 @@ select:focus {
   .preview-panel {
     border: none;
     padding: 0;
+    background: transparent !important;
+  }
+
+  .panel {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
   }
 
   .resume {
     border: none;
     border-radius: 0;
     min-height: auto;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .resume-sidebar {
+    background: linear-gradient(180deg, var(--accent), color-mix(in oklab, var(--accent) 75%, black)) !important;
+    color: #ffffff !important;
+  }
+
+  .resume-main h4,
+  .entry {
+    color: inherit;
   }
 }
