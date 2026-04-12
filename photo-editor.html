@@ -19,6 +19,7 @@
       <div class="actions">
         <a class="btn ghost" href="index.html">Resume Builder</a>
         <button class="btn" id="resetBtn" type="button">Reset</button>
+        <button class="btn" id="undoBtn" type="button">Undo</button>
         <button class="btn primary" id="downloadBtn" type="button">Download PNG</button>
       </div>
     </header>
@@ -50,14 +51,45 @@
             Export quality (JPEG)
             <input id="qualityInput" type="range" min="0.2" max="1" step="0.01" value="0.92" />
           </label>
+          <div class="target-size-grid">
+            <label>
+              Target Size
+              <input id="targetSizeInput" type="number" min="1" step="1" placeholder="250" />
+            </label>
+            <label>
+              Unit
+              <select id="targetSizeUnit">
+                <option value="KB">KB</option>
+                <option value="MB">MB</option>
+              </select>
+            </label>
+          </div>
           <button id="applyResize" class="btn" type="button">Apply Resize</button>
           <button id="downloadJpg" class="btn" type="button">Download JPG</button>
+          <button id="downloadTarget" class="btn" type="button">Download at Target Size</button>
           <p id="sizeInfo" class="hint">Upload an image to see size details.</p>
         </div>
 
         <div class="control-group">
           <h3>Crop</h3>
-          <p class="hint">Drag on image to create crop box, then apply crop.</p>
+          <p class="hint">Drag directly on the image to create crop selection. Use ratio preset and arrow keys for precision.</p>
+          <label>
+            Crop Ratio
+            <select id="cropAspect">
+              <option value="free">Free</option>
+              <option value="1:1">1:1 Square</option>
+              <option value="4:5">4:5 Portrait</option>
+              <option value="3:4">3:4 Portrait</option>
+              <option value="16:9">16:9 Wide</option>
+            </select>
+          </label>
+          <button id="centerCrop" class="btn" type="button">Center Crop Preset</button>
+          <div class="crop-arrows" aria-label="Move crop area">
+            <button id="cropUp" class="btn" type="button">Up</button>
+            <button id="cropLeft" class="btn" type="button">Left</button>
+            <button id="cropRight" class="btn" type="button">Right</button>
+            <button id="cropDown" class="btn" type="button">Down</button>
+          </div>
           <button id="applyCrop" class="btn" type="button">Apply Crop</button>
           <button id="clearCrop" class="btn ghost" type="button">Clear Crop</button>
         </div>
@@ -81,14 +113,6 @@
           <label>Sharpen <input id="sharpen" type="range" min="0" max="5" value="0" step="0.1" /></label>
           <button id="applyEnhance" class="btn" type="button">Apply Enhancements</button>
         </div>
-
-        <div class="control-group">
-          <h3>Background Removal</h3>
-          <p class="hint">Uses smart edge-color removal for plain backgrounds. Best for passport or profile photos.</p>
-          <label>Strength <input id="bgStrength" type="range" min="10" max="80" value="32" /></label>
-          <button id="removeBg" class="btn" type="button">Remove Background</button>
-          <button id="softBg" class="btn ghost" type="button">Soften Edges</button>
-        </div>
       </section>
 
       <section class="panel preview">
@@ -96,7 +120,6 @@
         <div class="canvas-wrap" id="canvasWrap">
           <canvas id="canvas" width="900" height="600"></canvas>
           <div id="cropRect" class="crop-rect hidden"></div>
-          <p id="emptyText" class="empty">Upload a photo to start editing.</p>
         </div>
       </section>
     </main>

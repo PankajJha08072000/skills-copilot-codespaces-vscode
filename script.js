@@ -255,7 +255,7 @@ function bindCardEvents(card) {
   });
 }
 
-function addCard(type, initial = {}) {
+function addCard(type, initial = {}, skipSync = false) {
   const templateId = `${type}Template`;
   const template = document.getElementById(templateId);
   const card = template.content.firstElementChild.cloneNode(true);
@@ -267,7 +267,37 @@ function addCard(type, initial = {}) {
 
   lists[type].appendChild(card);
   bindCardEvents(card);
-  syncPreview();
+  if (!skipSync) {
+    syncPreview();
+  }
+}
+
+function sanitizeEntries(entries) {
+  const seen = new Set();
+  const cleaned = [];
+
+  entries.forEach((item) => {
+    const normalized = {
+      title: (item?.title || "").trim(),
+      org: (item?.org || "").trim(),
+      duration: (item?.duration || "").trim(),
+      desc: (item?.desc || "").trim()
+    };
+
+    const isEmpty = !normalized.title && !normalized.org && !normalized.duration && !normalized.desc;
+    const key = `${normalized.title}|${normalized.org}|${normalized.duration}|${normalized.desc}`;
+
+    if (isEmpty) {
+      return;
+    }
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      cleaned.push(normalized);
+    }
+  });
+
+  return cleaned;
 }
 
 function gatherState() {
@@ -316,13 +346,15 @@ function restore() {
 
     ["experience", "education", "projects"].forEach((type) => {
       lists[type].innerHTML = "";
-      const entries = Array.isArray(data[type]) ? data[type] : [];
+      const entries = sanitizeEntries(Array.isArray(data[type]) ? data[type] : []);
       if (!entries.length) {
-        addCard(type);
+        addCard(type, {}, true);
       } else {
-        entries.forEach((entry) => addCard(type, entry));
+        entries.forEach((entry) => addCard(type, entry, true));
       }
     });
+
+    syncPreview();
   } catch {
     addCard("experience");
     addCard("education");

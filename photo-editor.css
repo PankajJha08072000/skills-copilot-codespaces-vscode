@@ -58,6 +58,8 @@ h3 {
 .actions {
   display: flex;
   gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .layout {
@@ -109,7 +111,8 @@ button {
 
 input[type="number"],
 input[type="file"],
-input[type="range"] {
+input[type="range"],
+select {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.55rem 0.6rem;
@@ -135,6 +138,7 @@ input[type="range"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 40px;
 }
 
 .btn.primary {
@@ -148,6 +152,18 @@ input[type="range"] {
 }
 
 .tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.target-size-grid {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 0.5rem;
+}
+
+.crop-arrows {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
@@ -180,6 +196,10 @@ input[type="range"] {
   overflow: hidden;
 }
 
+.crop-active {
+  cursor: crosshair;
+}
+
 canvas {
   display: block;
   max-width: 100%;
@@ -197,22 +217,34 @@ canvas {
   display: none;
 }
 
-.empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: var(--warn);
-  font-weight: 600;
-}
-
 @media (max-width: 980px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .actions .btn {
+    flex: 1 1 160px;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }
 
   .controls {
     max-height: none;
+  }
+
+  .target-size-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-grid {
+    grid-template-columns: 1fr;
   }
 }

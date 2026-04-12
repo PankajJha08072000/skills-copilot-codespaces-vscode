@@ -3,12 +3,14 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 const canvasWrap = document.getElementById("canvasWrap");
 const cropRectEl = document.getElementById("cropRect");
-const emptyText = document.getElementById("emptyText");
 
 const widthInput = document.getElementById("widthInput");
 const heightInput = document.getElementById("heightInput");
 const lockAspect = document.getElementById("lockAspect");
 const qualityInput = document.getElementById("qualityInput");
+const targetSizeInput = document.getElementById("targetSizeInput");
+const targetSizeUnit = document.getElementById("targetSizeUnit");
+const cropAspect = document.getElementById("cropAspect");
 const sizeInfo = document.getElementById("sizeInfo");
 
 const controls = {
@@ -26,21 +28,78 @@ const state = {
   crop: null,
   dragging: false,
   startX: 0,
-  startY: 0
+  startY: 0,
+  history: [],
+  applyingHistory: false
 };
 
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-function updateSizeInfo() {
+function parseAspectRatio(value) {
+  if (!value || value === "free") {
+    return null;
+  }
+  const [w, h] = value.split(":").map(Number);
+  if (!w || !h) return null;
+  return w / h;
+}
+
+function updateSizeInfo(message) {
+  if (message) {
+    sizeInfo.textContent = message;
+    return;
+  }
   if (!state.imageLoaded) {
-    sizeInfo.textContent = "Upload an image to see size details.";
+    sizeInfo.textContent = "Select an image to begin.";
     return;
   }
   const pixels = canvas.width * canvas.height;
   const estimatedPngKb = Math.round((pixels * 4) / 1024);
   sizeInfo.textContent = `Canvas: ${canvas.width}x${canvas.height}px | Approx raw size: ${estimatedPngKb} KB | Original upload: ${Math.round(state.originalBlobSize / 1024)} KB`;
+}
+
+function captureHistory() {
+  if (!state.imageLoaded || state.applyingHistory) return;
+
+  const snapshot = {
+    dataUrl: canvas.toDataURL("image/png"),
+    width: canvas.width,
+    height: canvas.height,
+    aspectRatio: state.aspectRatio
+  };
+
+  const last = state.history[state.history.length - 1];
+  if (last && last.dataUrl === snapshot.dataUrl) return;
+
+  state.history.push(snapshot);
+  if (state.history.length > 15) {
+    state.history.shift();
+  }
+}
+
+function restoreSnapshot(snapshot) {
+  state.applyingHistory = true;
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = snapshot.width;
+    canvas.height = snapshot.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    widthInput.value = canvas.width;
+    heightInput.value = canvas.height;
+    state.aspectRatio = snapshot.aspectRatio || (canvas.width / canvas.height);
+    state.imageLoaded = true;
+    clearCropVisual();
+    updateSizeInfo();
+    state.applyingHistory = false;
+  };
+  img.src = snapshot.dataUrl;
+}
+
+function commitState() {
+  captureHistory();
 }
 
 function drawImageToCanvas(img) {
@@ -53,7 +112,8 @@ function drawImageToCanvas(img) {
   heightInput.value = canvas.height;
   state.aspectRatio = canvas.width / canvas.height;
   state.imageLoaded = true;
-  emptyText.classList.add("hidden");
+  state.history = [];
+  captureHistory();
   clearCropVisual();
   updateSizeInfo();
 }
@@ -97,6 +157,66 @@ function replaceCanvas(newCanvas) {
   updateSizeInfo();
 }
 
+function getTargetBytes() {
+  const amount = Number(targetSizeInput.value);
+  if (!amount || amount <= 0) return null;
+  return targetSizeUnit.value === "MB" ? amount * 1024 * 1024 : amount * 1024;
+}
+
+function exportImage(mime, quality, fileName) {
+  if (!state.imageLoaded) return;
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, mime, quality);
+}
+
+async function exportAtTargetSize() {
+  if (!state.imageLoaded) return;
+
+  const targetBytes = getTargetBytes();
+  if (!targetBytes) {
+    exportImage("image/jpeg", Number(qualityInput.value), "pankaj-edited-photo.jpg");
+    return;
+  }
+
+  let low = 0.2;
+  let high = 1;
+  let bestBlob = null;
+  let bestDiff = Infinity;
+
+  for (let i = 0; i < 8; i += 1) {
+    const quality = (low + high) / 2;
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob) break;
+
+    const diff = Math.abs(blob.size - targetBytes);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestBlob = blob;
+    }
+
+    if (blob.size > targetBytes) high = quality;
+    else low = quality;
+  }
+
+  if (!bestBlob) {
+    exportImage("image/jpeg", Number(qualityInput.value), "pankaj-edited-photo.jpg");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(bestBlob);
+  const suffix = targetSizeUnit.value === "MB" ? `${Number(targetSizeInput.value)}mb` : `${Number(targetSizeInput.value)}kb`;
+  link.download = `pankaj-edited-photo-${suffix}.jpg`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
 document.getElementById("applyResize").addEventListener("click", () => {
   if (!state.imageLoaded) return;
 
@@ -109,36 +229,54 @@ document.getElementById("applyResize").addEventListener("click", () => {
   const tctx = temp.getContext("2d");
   tctx.drawImage(canvas, 0, 0, targetW, targetH);
   replaceCanvas(temp);
+  commitState();
 });
 
-function downloadCanvas(mime, quality, fileName) {
-  if (!state.imageLoaded) return;
-  canvas.toBlob(
-    (blob) => {
-      if (!blob) return;
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    },
-    mime,
-    quality
-  );
-}
-
 document.getElementById("downloadBtn").addEventListener("click", () => {
-  downloadCanvas("image/png", 1, "pankaj-edited-photo.png");
+  exportImage("image/png", 1, "pankaj-edited-photo.png");
 });
 
 document.getElementById("downloadJpg").addEventListener("click", () => {
-  const quality = Number(qualityInput.value);
-  downloadCanvas("image/jpeg", quality, "pankaj-edited-photo.jpg");
+  exportImage("image/jpeg", Number(qualityInput.value), "pankaj-edited-photo.jpg");
+});
+
+document.getElementById("downloadTarget").addEventListener("click", exportAtTargetSize);
+
+document.getElementById("undoBtn").addEventListener("click", () => {
+  if (state.history.length < 2) return;
+  state.history.pop();
+  const snapshot = state.history[state.history.length - 1];
+  if (snapshot) restoreSnapshot(snapshot);
 });
 
 function clearCropVisual() {
   state.crop = null;
   cropRectEl.classList.add("hidden");
+  cropRectEl.style.width = "0px";
+  cropRectEl.style.height = "0px";
+}
+
+function renderCropRect() {
+  if (!state.crop) {
+    clearCropVisual();
+    return;
+  }
+
+  const { x, y, w, h } = state.crop;
+  if (w < 1 || h < 1) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const left = (x / canvas.width) * rect.width;
+  const top = (y / canvas.height) * rect.height;
+  const cw = (w / canvas.width) * rect.width;
+  const ch = (h / canvas.height) * rect.height;
+
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  cropRectEl.style.left = `${left + (rect.left - wrapRect.left)}px`;
+  cropRectEl.style.top = `${top + (rect.top - wrapRect.top)}px`;
+  cropRectEl.style.width = `${cw}px`;
+  cropRectEl.style.height = `${ch}px`;
+  cropRectEl.classList.remove("hidden");
 }
 
 function getCanvasCoords(event) {
@@ -148,42 +286,79 @@ function getCanvasCoords(event) {
   return { x: clamp(x, 0, canvas.width), y: clamp(y, 0, canvas.height) };
 }
 
-canvas.addEventListener("mousedown", (event) => {
+canvas.addEventListener("pointerdown", (event) => {
   if (!state.imageLoaded) return;
   state.dragging = true;
+  canvas.setPointerCapture(event.pointerId);
   const p = getCanvasCoords(event);
   state.startX = p.x;
   state.startY = p.y;
   state.crop = { x: p.x, y: p.y, w: 0, h: 0 };
-  cropRectEl.classList.remove("hidden");
+  renderCropRect();
 });
 
-window.addEventListener("mousemove", (event) => {
+window.addEventListener("pointermove", (event) => {
   if (!state.dragging || !state.crop) return;
   const p = getCanvasCoords(event);
 
-  const x = Math.min(state.startX, p.x);
-  const y = Math.min(state.startY, p.y);
-  const w = Math.abs(p.x - state.startX);
-  const h = Math.abs(p.y - state.startY);
+  let x = Math.min(state.startX, p.x);
+  let y = Math.min(state.startY, p.y);
+  let w = Math.abs(p.x - state.startX);
+  let h = Math.abs(p.y - state.startY);
+
+  const ratio = parseAspectRatio(cropAspect.value);
+  if (ratio) {
+    if (w / Math.max(1, h) > ratio) {
+      w = h * ratio;
+    } else {
+      h = w / ratio;
+    }
+
+    if (p.x < state.startX) x = state.startX - w;
+    if (p.y < state.startY) y = state.startY - h;
+
+    x = clamp(x, 0, canvas.width - w);
+    y = clamp(y, 0, canvas.height - h);
+  }
 
   state.crop = { x, y, w, h };
-
-  const rect = canvas.getBoundingClientRect();
-  const left = (x / canvas.width) * rect.width;
-  const top = (y / canvas.height) * rect.height;
-  const cw = (w / canvas.width) * rect.width;
-  const ch = (h / canvas.height) * rect.height;
-
-  cropRectEl.style.left = `${left}px`;
-  cropRectEl.style.top = `${top}px`;
-  cropRectEl.style.width = `${cw}px`;
-  cropRectEl.style.height = `${ch}px`;
+  renderCropRect();
 });
 
-window.addEventListener("mouseup", () => {
+window.addEventListener("pointerup", () => {
   state.dragging = false;
 });
+
+function createCenterCrop() {
+  if (!state.imageLoaded) return;
+  const ratio = parseAspectRatio(cropAspect.value);
+
+  let w = Math.round(canvas.width * 0.7);
+  let h = Math.round(canvas.height * 0.7);
+
+  if (ratio) {
+    if (canvas.width / canvas.height > ratio) {
+      h = Math.round(canvas.height * 0.75);
+      w = Math.round(h * ratio);
+    } else {
+      w = Math.round(canvas.width * 0.75);
+      h = Math.round(w / ratio);
+    }
+  }
+
+  w = clamp(w, 10, canvas.width);
+  h = clamp(h, 10, canvas.height);
+
+  state.crop = {
+    x: Math.round((canvas.width - w) / 2),
+    y: Math.round((canvas.height - h) / 2),
+    w,
+    h
+  };
+  renderCropRect();
+}
+
+document.getElementById("centerCrop").addEventListener("click", createCenterCrop);
 
 document.getElementById("applyCrop").addEventListener("click", () => {
   if (!state.imageLoaded || !state.crop) return;
@@ -196,10 +371,44 @@ document.getElementById("applyCrop").addEventListener("click", () => {
   const tctx = temp.getContext("2d");
   tctx.drawImage(canvas, x, y, w, h, 0, 0, temp.width, temp.height);
   replaceCanvas(temp);
+  commitState();
   clearCropVisual();
 });
 
 document.getElementById("clearCrop").addEventListener("click", clearCropVisual);
+
+function nudgeCrop(dx, dy) {
+  if (!state.crop) {
+    updateSizeInfo("Create crop selection first, then use arrow buttons.");
+    return;
+  }
+
+  state.crop.x = clamp(state.crop.x + dx, 0, Math.max(0, canvas.width - state.crop.w));
+  state.crop.y = clamp(state.crop.y + dy, 0, Math.max(0, canvas.height - state.crop.h));
+  renderCropRect();
+}
+
+document.getElementById("cropUp").addEventListener("click", () => nudgeCrop(0, -5));
+document.getElementById("cropDown").addEventListener("click", () => nudgeCrop(0, 5));
+document.getElementById("cropLeft").addEventListener("click", () => nudgeCrop(-5, 0));
+document.getElementById("cropRight").addEventListener("click", () => nudgeCrop(5, 0));
+
+window.addEventListener("keydown", (event) => {
+  if (!state.crop) return;
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    nudgeCrop(0, -1);
+  } else if (event.key === "ArrowDown") {
+    event.preventDefault();
+    nudgeCrop(0, 1);
+  } else if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    nudgeCrop(-1, 0);
+  } else if (event.key === "ArrowRight") {
+    event.preventDefault();
+    nudgeCrop(1, 0);
+  }
+});
 
 function applyKernel(kernel, divisor = 1, bias = 0) {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -283,6 +492,8 @@ function applyEnhancements() {
       applyKernel([0, -1, 0, -1, 5, -1, 0, -1, 0]);
     }
   }
+
+  commitState();
 }
 
 document.getElementById("applyEnhance").addEventListener("click", applyEnhancements);
@@ -301,6 +512,7 @@ function rotateCanvas(deg) {
   tctx.rotate(radians);
   tctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
   replaceCanvas(temp);
+  commitState();
 }
 
 document.getElementById("rotateLeft").addEventListener("click", () => rotateCanvas(-90));
@@ -312,120 +524,38 @@ function flipCanvas(horizontal) {
   temp.width = canvas.width;
   temp.height = canvas.height;
   const tctx = temp.getContext("2d");
-
-  tctx.save();
   if (horizontal) {
-    tctx.translate(temp.width, 0);
-    tctx.scale(-1, 1);
+    tctx.setTransform(-1, 0, 0, 1, temp.width, 0);
   } else {
-    tctx.translate(0, temp.height);
-    tctx.scale(1, -1);
+    tctx.setTransform(1, 0, 0, -1, 0, temp.height);
   }
   tctx.drawImage(canvas, 0, 0);
-  tctx.restore();
-
   replaceCanvas(temp);
+  commitState();
 }
 
 document.getElementById("flipH").addEventListener("click", () => flipCanvas(true));
 document.getElementById("flipV").addEventListener("click", () => flipCanvas(false));
 
-function sampleEdgeColor() {
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-  const picks = [];
-
-  for (let x = 0; x < canvas.width; x += Math.max(1, Math.floor(canvas.width / 80))) {
-    picks.push((0 * canvas.width + x) * 4);
-    picks.push(((canvas.height - 1) * canvas.width + x) * 4);
-  }
-  for (let y = 0; y < canvas.height; y += Math.max(1, Math.floor(canvas.height / 80))) {
-    picks.push((y * canvas.width + 0) * 4);
-    picks.push((y * canvas.width + (canvas.width - 1)) * 4);
-  }
-
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  picks.forEach((idx) => {
-    r += img[idx];
-    g += img[idx + 1];
-    b += img[idx + 2];
-  });
-
-  return { r: r / picks.length, g: g / picks.length, b: b / picks.length };
-}
-
-function removeBackground() {
-  if (!state.imageLoaded) return;
-
-  const threshold = Number(document.getElementById("bgStrength").value);
-  const edge = sampleEdgeColor();
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-
-  for (let i = 0; i < data.length; i += 4) {
-    const dr = data[i] - edge.r;
-    const dg = data[i + 1] - edge.g;
-    const db = data[i + 2] - edge.b;
-    const dist = Math.sqrt(dr * dr + dg * dg + db * db);
-
-    if (dist < threshold) {
-      data[i + 3] = 0;
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-}
-
-document.getElementById("removeBg").addEventListener("click", removeBackground);
-
-function softenTransparentEdges() {
-  if (!state.imageLoaded) return;
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-
-  for (let y = 1; y < canvas.height - 1; y += 1) {
-    for (let x = 1; x < canvas.width - 1; x += 1) {
-      const i = (y * canvas.width + x) * 4;
-      if (data[i + 3] === 0) continue;
-
-      let transparentNeighbors = 0;
-      for (let oy = -1; oy <= 1; oy += 1) {
-        for (let ox = -1; ox <= 1; ox += 1) {
-          const ni = ((y + oy) * canvas.width + (x + ox)) * 4;
-          if (data[ni + 3] === 0) transparentNeighbors += 1;
-        }
-      }
-
-      if (transparentNeighbors >= 3) {
-        data[i + 3] = Math.max(30, data[i + 3] - transparentNeighbors * 18);
-      }
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-}
-
-document.getElementById("softBg").addEventListener("click", softenTransparentEdges);
-
 document.getElementById("resetBtn").addEventListener("click", () => {
   uploadInput.value = "";
   state.imageLoaded = false;
   state.originalBlobSize = 0;
+  state.history = [];
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas.width = 900;
   canvas.height = 600;
-  emptyText.classList.remove("hidden");
   clearCropVisual();
 
   widthInput.value = "";
   heightInput.value = "";
+  targetSizeInput.value = "";
 
   Object.values(controls).forEach((slider) => {
     slider.value = 0;
   });
   qualityInput.value = 0.92;
-  document.getElementById("bgStrength").value = 32;
+  cropAspect.value = "free";
   updateSizeInfo();
 });
 
