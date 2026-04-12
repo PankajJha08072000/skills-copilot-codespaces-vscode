@@ -385,6 +385,11 @@ select:focus {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -434,5 +439,53 @@ select:focus {
   .resume-main h4,
   .entry {
     color: inherit;
+  }
+
+  .resume.one-page-mode {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .resume.one-page-mode.split {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .resume.one-page-mode .resume-sidebar {
+    padding: 0.75rem;
+  }
+
+  .resume.one-page-mode .resume-main {
+    padding: 0.75rem;
+  }
+
+  .resume.one-page-mode .resume-main section {
+    margin-bottom: 0.55rem;
+    break-inside: avoid;
+  }
+
+  .resume.one-page-mode .identity-block h3 {
+    font-size: 1.05rem;
+  }
+
+  .resume.one-page-mode .identity-block p,
+  .resume.one-page-mode .meta-block,
+  .resume.one-page-mode .chip-list li,
+  .resume.one-page-mode .entry-org,
+  .resume.one-page-mode .entry-desc {
+    font-size: 0.74rem;
+  }
+
+  .resume.one-page-mode .resume-main h4 {
+    margin-bottom: 0.25rem;
+    font-size: 0.82rem;
+  }
+
+  .resume.one-page-mode .entry-list {
+    gap: 0.4rem;
+  }
+
+  .resume.one-page-mode .entry {
+    padding-left: 0.45rem;
+    break-inside: avoid;
   }
 }

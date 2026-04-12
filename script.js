@@ -387,12 +387,27 @@ function resetAll() {
   syncPreview();
 }
 
+function printResume(onePage = false) {
+  if (onePage) {
+    resumeEl.classList.add("one-page-mode");
+  } else {
+    resumeEl.classList.remove("one-page-mode");
+  }
+
+  window.print();
+}
+
 document.getElementById("addExperience").addEventListener("click", () => addCard("experience"));
 document.getElementById("addEducation").addEventListener("click", () => addCard("education"));
 document.getElementById("addProject").addEventListener("click", () => addCard("projects"));
 
-document.getElementById("downloadBtn").addEventListener("click", () => window.print());
+document.getElementById("downloadBtn").addEventListener("click", () => printResume(false));
+document.getElementById("onePageBtn").addEventListener("click", () => printResume(true));
 document.getElementById("clearBtn").addEventListener("click", resetAll);
+
+window.addEventListener("afterprint", () => {
+  resumeEl.classList.remove("one-page-mode");
+});
 
 Object.values(fields).forEach((input) => {
   input.addEventListener("input", syncPreview);
