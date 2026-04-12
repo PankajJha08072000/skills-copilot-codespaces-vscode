@@ -256,7 +256,7 @@ function bindCardEvents(card) {
 }
 
 function addCard(type, initial = {}, skipSync = false) {
-  const templateId = `${type}Template`;
+  const templateId = type === "projects" ? "projectTemplate" : `${type}Template`;
   const template = document.getElementById(templateId);
   const card = template.content.firstElementChild.cloneNode(true);
 
