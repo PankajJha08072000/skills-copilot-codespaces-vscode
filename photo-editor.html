@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pankaj PhotoForge Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="photo-editor.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <h1>Pankaj PhotoForge Editor</h1>
+      <div class="actions">
+        <a class="btn ghost" href="index.html">Resume Builder</a>
+        <button class="btn" id="resetBtn" type="button">Reset</button>
+        <button class="btn primary" id="downloadBtn" type="button">Download PNG</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <h2>Image Tools</h2>
+
+        <label class="upload">
+          Upload Photo
+          <input id="uploadInput" type="file" accept="image/*" />
+        </label>
+
+        <div class="control-group">
+          <h3>Resize & Compress</h3>
+          <label>
+            Width (px)
+            <input id="widthInput" type="number" min="32" step="1" />
+          </label>
+          <label>
+            Height (px)
+            <input id="heightInput" type="number" min="32" step="1" />
+          </label>
+          <label class="row">
+            <input id="lockAspect" type="checkbox" checked />
+            Lock aspect ratio
+          </label>
+          <label>
+            Export quality (JPEG)
+            <input id="qualityInput" type="range" min="0.2" max="1" step="0.01" value="0.92" />
+          </label>
+          <button id="applyResize" class="btn" type="button">Apply Resize</button>
+          <button id="downloadJpg" class="btn" type="button">Download JPG</button>
+          <p id="sizeInfo" class="hint">Upload an image to see size details.</p>
+        </div>
+
+        <div class="control-group">
+          <h3>Crop</h3>
+          <p class="hint">Drag on image to create crop box, then apply crop.</p>
+          <button id="applyCrop" class="btn" type="button">Apply Crop</button>
+          <button id="clearCrop" class="btn ghost" type="button">Clear Crop</button>
+        </div>
+
+        <div class="control-group">
+          <h3>Rotate & Flip</h3>
+          <div class="tool-grid">
+            <button id="rotateLeft" class="btn" type="button">Rotate -90deg</button>
+            <button id="rotateRight" class="btn" type="button">Rotate +90deg</button>
+            <button id="flipH" class="btn" type="button">Flip Horizontal</button>
+            <button id="flipV" class="btn" type="button">Flip Vertical</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h3>Enhance</h3>
+          <label>Brightness <input id="brightness" type="range" min="-100" max="100" value="0" /></label>
+          <label>Contrast <input id="contrast" type="range" min="-100" max="100" value="0" /></label>
+          <label>Saturation <input id="saturation" type="range" min="-100" max="100" value="0" /></label>
+          <label>Blur <input id="blur" type="range" min="0" max="8" value="0" step="0.1" /></label>
+          <label>Sharpen <input id="sharpen" type="range" min="0" max="5" value="0" step="0.1" /></label>
+          <button id="applyEnhance" class="btn" type="button">Apply Enhancements</button>
+        </div>
+
+        <div class="control-group">
+          <h3>Background Removal</h3>
+          <p class="hint">Uses smart edge-color removal for plain backgrounds. Best for passport or profile photos.</p>
+          <label>Strength <input id="bgStrength" type="range" min="10" max="80" value="32" /></label>
+          <button id="removeBg" class="btn" type="button">Remove Background</button>
+          <button id="softBg" class="btn ghost" type="button">Soften Edges</button>
+        </div>
+      </section>
+
+      <section class="panel preview">
+        <h2>Canvas Preview</h2>
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="canvas" width="900" height="600"></canvas>
+          <div id="cropRect" class="crop-rect hidden"></div>
+          <p id="emptyText" class="empty">Upload a photo to start editing.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="photo-editor.js"></script>
+  </body>
+</html>

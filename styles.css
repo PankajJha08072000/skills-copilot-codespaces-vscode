@@ -117,6 +117,13 @@ select:focus {
   margin-top: 0.85rem;
 }
 
+.helper-text {
+  margin: 0.45rem 0 0.2rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
 .builder-section {
   margin-top: 1rem;
   padding-top: 0.5rem;
@@ -190,6 +197,40 @@ select:focus {
   color: #ad3127;
   border-color: #efc6c2;
   padding: 0.35rem 0.65rem;
+}
+
+.coach-panel {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 6%, white), #ffffff);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, #d7d8d9);
+  border-radius: 14px;
+  padding: 0.9rem;
+}
+
+.score-pill {
+  background: color-mix(in oklab, var(--accent) 20%, white);
+  border: 1px solid color-mix(in oklab, var(--accent) 48%, white);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.coach-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.32rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.coach-list li.pass {
+  color: #157347;
+}
+
+.coach-list li.warn {
+  color: #8b5f00;
 }
 
 .preview-panel {

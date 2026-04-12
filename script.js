@@ -9,8 +9,16 @@ const fields = {
   website: document.getElementById("website"),
   summary: document.getElementById("summary"),
   skills: document.getElementById("skills"),
+  targetCompany: document.getElementById("targetCompany"),
+  targetRole: document.getElementById("targetRole"),
   accent: document.getElementById("accent"),
   layoutMode: document.getElementById("layoutMode")
+};
+
+const coach = {
+  score: document.getElementById("readinessScore"),
+  summary: document.getElementById("scoreSummary"),
+  checklist: document.getElementById("coachChecklist")
 };
 
 const preview = {
@@ -43,7 +51,94 @@ const defaults = {
   summary: "Your summary appears here."
 };
 
-const storageKey = "novaResumeBuilderData";
+const storageKey = "pankajEliteResumeStudioData";
+
+function normalize(text) {
+  return text.toLowerCase();
+}
+
+function hasMetric(text) {
+  return /(\d+%|\d+\+|\$\d+|\d+x)/i.test(text);
+}
+
+function countStrongBullets(entries) {
+  const actionVerbs = [
+    "built", "designed", "launched", "improved", "optimized", "reduced", "scaled", "implemented", "led", "automated"
+  ];
+
+  return entries.filter((item) => {
+    const body = `${item.title} ${item.org} ${item.desc}`.toLowerCase();
+    const hasAction = actionVerbs.some((verb) => body.includes(verb));
+    return hasAction && hasMetric(body);
+  }).length;
+}
+
+function renderCoachItems(items) {
+  coach.checklist.innerHTML = "";
+  items.forEach((item) => {
+    const li = document.createElement("li");
+    li.className = item.ok ? "pass" : "warn";
+    li.textContent = `${item.ok ? "PASS" : "IMPROVE"}: ${item.text}`;
+    coach.checklist.appendChild(li);
+  });
+}
+
+function updateReadinessScore(experienceData, projectData) {
+  let score = 0;
+  const checks = [];
+
+  const hasIdentity = Boolean(fields.name.value.trim() && fields.headline.value.trim() && fields.email.value.trim());
+  checks.push({ ok: hasIdentity, text: "Identity section includes name, role headline, and professional email." });
+  if (hasIdentity) score += 12;
+
+  const summary = fields.summary.value.trim();
+  const summaryStrong = summary.length >= 90 && hasMetric(summary);
+  checks.push({ ok: summaryStrong, text: "Summary is impact-focused and includes measurable outcomes." });
+  if (summaryStrong) score += 18;
+
+  const skillCount = fields.skills.value.split(",").map((s) => s.trim()).filter(Boolean).length;
+  const skillStrong = skillCount >= 8;
+  checks.push({ ok: skillStrong, text: "Skills list has at least 8 relevant strengths for technical screening." });
+  if (skillStrong) score += 15;
+
+  const strongExpBullets = countStrongBullets(experienceData);
+  const expStrong = experienceData.length >= 2 && strongExpBullets >= 2;
+  checks.push({ ok: expStrong, text: "Experience has at least 2 entries with action + metrics (STAR style)." });
+  if (expStrong) score += 25;
+
+  const strongProjectBullets = countStrongBullets(projectData);
+  const projectStrong = projectData.length >= 2 && strongProjectBullets >= 1;
+  checks.push({ ok: projectStrong, text: "Projects show ownership and measurable impact with modern tech stack." });
+  if (projectStrong) score += 15;
+
+  const targetCompany = normalize(fields.targetCompany.value.trim());
+  const targetRole = normalize(fields.targetRole.value.trim());
+  const fullText = normalize(`${fields.headline.value} ${fields.skills.value} ${summary} ${experienceData.map((e) => e.desc).join(" ")} ${projectData.map((p) => p.desc).join(" ")}`);
+
+  const companyKeywords = targetCompany.includes("google")
+    ? ["scale", "distributed", "latency", "reliability", "ownership"]
+    : targetCompany.includes("amazon")
+      ? ["customer", "ownership", "deliver", "automate", "efficiency"]
+      : ["leadership", "impact", "optimization", "scalability", "execution"];
+
+  const hits = companyKeywords.filter((k) => fullText.includes(k)).length;
+  const companyAligned = Boolean(targetCompany || targetRole) && hits >= 2;
+  checks.push({ ok: companyAligned, text: "Content is tailored to target role/company keywords used in top-tier interviews." });
+  if (companyAligned) score += 15;
+
+  if (!targetCompany && !targetRole) {
+    coach.summary.textContent = "Tip: Add a target company and role for sharper Google/Amazon style guidance.";
+  } else if (score >= 80) {
+    coach.summary.textContent = "Strong draft. Your resume is interview-ready for top-tier screening rounds.";
+  } else if (score >= 60) {
+    coach.summary.textContent = "Good direction. Improve highlighted areas to become highly competitive.";
+  } else {
+    coach.summary.textContent = "Needs strengthening. Focus on quantified impact, targeted keywords, and stronger bullets.";
+  }
+
+  coach.score.textContent = `${score}/100`;
+  renderCoachItems(checks);
+}
 
 function getCardData(listEl) {
   return Array.from(listEl.querySelectorAll(".card-item")).map((card) => ({
@@ -107,6 +202,10 @@ function renderEntries(target, entries, emptyText) {
 }
 
 function syncPreview() {
+  const experienceData = getCardData(lists.experience);
+  const educationData = getCardData(lists.education);
+  const projectData = getCardData(lists.projects);
+
   preview.name.textContent = fields.name.value.trim() || defaults.name;
   preview.headline.textContent = fields.headline.value.trim() || defaults.headline;
   preview.email.textContent = fields.email.value.trim() || defaults.email;
@@ -133,9 +232,11 @@ function syncPreview() {
     });
   }
 
-  renderEntries(preview.experience, getCardData(lists.experience), "No experience added yet.");
-  renderEntries(preview.education, getCardData(lists.education), "No education added yet.");
-  renderEntries(preview.projects, getCardData(lists.projects), "No projects added yet.");
+  renderEntries(preview.experience, experienceData, "No experience added yet.");
+  renderEntries(preview.education, educationData, "No education added yet.");
+  renderEntries(preview.projects, projectData, "No projects added yet.");
+
+  updateReadinessScore(experienceData, projectData);
 
   document.documentElement.style.setProperty("--accent", fields.accent.value);
 
@@ -180,6 +281,8 @@ function gatherState() {
       website: fields.website.value,
       summary: fields.summary.value,
       skills: fields.skills.value,
+      targetCompany: fields.targetCompany.value,
+      targetRole: fields.targetRole.value,
       accent: fields.accent.value,
       layoutMode: fields.layoutMode.value
     },

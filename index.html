@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NovaResume Builder</title>
+    <title>Pankaj EliteResume Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,8 +15,9 @@
   <body>
     <div class="bg-grid" aria-hidden="true"></div>
     <header class="topbar">
-      <h1>NovaResume Builder</h1>
+      <h1>Pankaj EliteResume Studio</h1>
       <div class="topbar-actions">
+        <a class="btn btn-ghost" href="photo-editor.html">Photo Editor</a>
         <button id="downloadBtn" class="btn btn-primary">Print / Save PDF</button>
         <button id="clearBtn" class="btn btn-ghost">Clear All</button>
       </div>
@@ -88,6 +89,21 @@
         </label>
 
         <div class="builder-section">
+          <h3>Top-Tier Role Targeting</h3>
+          <p class="helper-text">Set your target so the resume quality checks match Google/Amazon-style hiring expectations.</p>
+          <div class="field-grid">
+            <label>
+              Target Company
+              <input id="targetCompany" type="text" placeholder="Google / Amazon / Meta" />
+            </label>
+            <label>
+              Target Role
+              <input id="targetRole" type="text" placeholder="SDE-2, Product Manager, Data Engineer" />
+            </label>
+          </div>
+        </div>
+
+        <div class="builder-section">
           <h3>Theme Settings</h3>
           <div class="field-grid">
             <label>
@@ -102,6 +118,15 @@
               </select>
             </label>
           </div>
+        </div>
+
+        <div class="builder-section coach-panel">
+          <div class="section-header">
+            <h3>Google/Amazon Readiness Coach</h3>
+            <span id="readinessScore" class="score-pill">0/100</span>
+          </div>
+          <p id="scoreSummary" class="helper-text">Build your profile to unlock a stronger interview-ready score.</p>
+          <ul id="coachChecklist" class="coach-list"></ul>
         </div>
       </section>
 
