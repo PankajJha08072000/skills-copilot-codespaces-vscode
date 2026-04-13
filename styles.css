@@ -376,6 +376,165 @@ select:focus {
   line-height: 1.42;
 }
 
+.pdf-export-mode .resume.one-page-mode {
+  display: block !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: "Times New Roman", Georgia, serif;
+  color: #121212;
+  font-size: 10.25pt;
+  line-height: 1.23;
+  background: #ffffff !important;
+}
+
+.pdf-export-mode .resume.one-page-mode .resume-sidebar,
+.pdf-export-mode .resume.one-page-mode .resume-main {
+  padding: 0;
+  background: white !important;
+  color: #121212 !important;
+}
+
+.pdf-export-mode .resume.one-page-mode .identity-block {
+  text-align: center;
+  margin-bottom: 0.18rem;
+}
+
+.pdf-export-mode .resume.one-page-mode .identity-block h3 {
+  margin: 0;
+  font-size: 20pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pdf-export-mode .resume.one-page-mode .identity-block p {
+  margin: 0.08rem 0 0;
+  font-size: 11pt;
+  color: #111;
+}
+
+.pdf-export-mode .resume.one-page-mode .meta-block {
+  margin: 0.2rem 0 0.42rem;
+  text-align: center;
+  border-bottom: 1px solid #8f8f8f;
+  padding-bottom: 0.28rem;
+  font-size: 9.8pt;
+}
+
+.pdf-export-mode .resume.one-page-mode .meta-block p {
+  display: inline;
+  margin: 0;
+  word-break: normal;
+}
+
+.pdf-export-mode .resume.one-page-mode .meta-block p:not(:last-child)::after {
+  content: "  |  ";
+}
+
+.pdf-export-mode .resume.one-page-mode .resume-sidebar section {
+  margin: 0 0 0.28rem;
+}
+
+.pdf-export-mode .resume.one-page-mode .resume-sidebar h4,
+.pdf-export-mode .resume.one-page-mode .resume-main h4 {
+  margin: 0 0 0.22rem;
+  padding-bottom: 0.08rem;
+  border-bottom: 1px solid #8f8f8f;
+  font-size: 13.5pt;
+  font-weight: 700;
+  color: #111;
+}
+
+.pdf-export-mode .resume.one-page-mode .chip-list {
+  display: block;
+  margin: 0;
+  padding-left: 1.05rem;
+  list-style: disc;
+}
+
+.pdf-export-mode .resume.one-page-mode .chip-list li {
+  display: list-item;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 9.75pt;
+}
+
+.pdf-export-mode .resume.one-page-mode .skill-empty,
+.pdf-export-mode .resume.one-page-mode .entry-empty,
+.pdf-export-mode .resume.one-page-mode #pSummary.is-placeholder {
+  display: none !important;
+}
+
+.pdf-export-mode .resume.one-page-mode .resume-main {
+  margin-top: 0.22rem;
+}
+
+.pdf-export-mode .resume.one-page-mode .resume-main section {
+  margin: 0 0 0.34rem;
+  break-inside: avoid;
+}
+
+.pdf-export-mode .resume.one-page-mode #pSummary {
+  margin: 0;
+  padding-left: 1.05rem;
+  position: relative;
+  font-size: 9.75pt;
+}
+
+.pdf-export-mode .resume.one-page-mode #pSummary::before {
+  content: "•";
+  position: absolute;
+  left: 0.35rem;
+  top: 0;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-list {
+  gap: 0.25rem;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry {
+  border-left: none;
+  padding-left: 0;
+  break-inside: avoid;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-title {
+  margin: 0;
+  font-size: 10.4pt;
+  font-weight: 700;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-org {
+  margin: 0;
+  color: #111;
+  font-style: italic;
+  font-size: 9.5pt;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-desc {
+  margin: 0.06rem 0 0.14rem;
+  padding-left: 1.05rem;
+  position: relative;
+  font-size: 9.55pt;
+}
+
+.pdf-export-mode .resume.one-page-mode .entry-desc::before {
+  content: "•";
+  position: absolute;
+  left: 0.35rem;
+  top: 0;
+}
+
 @media (max-width: 980px) {
   .topbar {
     align-items: flex-start;

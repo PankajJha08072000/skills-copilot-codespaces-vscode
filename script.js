@@ -434,6 +434,55 @@ function printResume(onePage = false) {
   requestAnimationFrame(runPrint);
 }
 
+async function downloadOnePagePdfMobile() {
+  if (typeof window.html2pdf !== "function") {
+    throw new Error("PDF library unavailable");
+  }
+
+  const cleanName = (fields.name.value || "resume").trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-_]/g, "");
+  const fileName = `${cleanName || "resume"}-one-page.pdf`;
+
+  resumeEl.classList.add("one-page-mode");
+  document.body.classList.add("pdf-export-mode");
+
+  // Ensure latest values and export styles are applied before rendering PDF canvas.
+  syncPreview();
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+
+  await window.html2pdf()
+    .set({
+      margin: [8, 8, 8, 8],
+      filename: fileName,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+    })
+    .from(resumeEl)
+    .save();
+
+  document.body.classList.remove("pdf-export-mode");
+}
+
+async function handleOnePageExport() {
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  if (!isMobile) {
+    printResume(true);
+    return;
+  }
+
+  try {
+    await downloadOnePagePdfMobile();
+  } catch {
+    // Fall back to print flow if PDF conversion is blocked on a specific mobile browser.
+    printResume(true);
+  } finally {
+    document.body.classList.remove("pdf-export-mode");
+    resumeEl.classList.remove("one-page-mode");
+  }
+}
+
 function setGrammarStatus(message, isError = false) {
   if (!grammar.status) {
     return;
@@ -537,7 +586,7 @@ document.getElementById("addProject").addEventListener("click", () => addCard("p
 document.getElementById("addCertification").addEventListener("click", () => addCard("certifications"));
 
 document.getElementById("downloadBtn").addEventListener("click", () => printResume(false));
-document.getElementById("onePageBtn").addEventListener("click", () => printResume(true));
+document.getElementById("onePageBtn").addEventListener("click", handleOnePageExport);
 document.getElementById("clearBtn").addEventListener("click", resetAll);
 if (grammar.button) {
   grammar.button.addEventListener("click", fixGrammarForTarget);
