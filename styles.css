@@ -118,6 +118,19 @@ select:focus {
   margin-top: 0.85rem;
 }
 
+.grammar-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.grammar-status {
+  min-height: 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 .helper-text {
   margin: 0.45rem 0 0.2rem;
   color: var(--muted);
@@ -434,7 +447,7 @@ select:focus {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm;
+    margin: 7mm;
   }
 
   * {
@@ -489,50 +502,131 @@ select:focus {
   }
 
   .resume.one-page-mode {
-    font-size: 12px;
-    line-height: 1.25;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 9.25pt;
+    line-height: 1.15;
+    color: #111;
   }
 
   .resume.one-page-mode.split {
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 1fr;
   }
 
   .resume.one-page-mode .resume-sidebar {
-    padding: 0.75rem;
+    background: transparent !important;
+    color: #111 !important;
+    padding: 0 0 0.35rem;
+    border-bottom: 1px solid #8a8a8a;
   }
 
   .resume.one-page-mode .resume-main {
-    padding: 0.75rem;
+    padding: 0.3rem 0 0;
+  }
+
+  .resume.one-page-mode .identity-block {
+    text-align: center;
   }
 
   .resume.one-page-mode .resume-main section {
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.35rem;
     break-inside: avoid;
   }
 
   .resume.one-page-mode .identity-block h3 {
-    font-size: 1.05rem;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 1.55rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.05rem;
   }
 
   .resume.one-page-mode .identity-block p,
   .resume.one-page-mode .meta-block,
-  .resume.one-page-mode .chip-list li,
   .resume.one-page-mode .entry-org,
   .resume.one-page-mode .entry-desc {
-    font-size: 0.74rem;
+    font-size: 0.75rem;
   }
 
+  .resume.one-page-mode .identity-block p {
+    margin: 0;
+  }
+
+  .resume.one-page-mode .meta-block {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.8rem;
+    margin-top: 0.1rem;
+  }
+
+  .resume.one-page-mode .meta-block p {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .resume.one-page-mode .resume-sidebar h4,
   .resume.one-page-mode .resume-main h4 {
-    margin-bottom: 0.25rem;
-    font-size: 0.82rem;
+    margin: 0 0 0.2rem;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111;
+    border-bottom: 1px solid #b1b1b1;
+    padding-bottom: 0.08rem;
+    letter-spacing: 0;
+  }
+
+  .resume.one-page-mode .resume-sidebar h4 {
+    margin-top: 0.45rem;
+  }
+
+  .resume.one-page-mode .chip-list {
+    gap: 0.2rem 0.4rem;
+    justify-content: center;
+  }
+
+  .resume.one-page-mode .chip-list li {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    color: #111;
+    font-size: 0.75rem;
   }
 
   .resume.one-page-mode .entry-list {
-    gap: 0.4rem;
+    gap: 0.28rem;
   }
 
   .resume.one-page-mode .entry {
-    padding-left: 0.45rem;
+    border-left: none;
+    padding-left: 0;
     break-inside: avoid;
+  }
+
+  .resume.one-page-mode .entry-top {
+    gap: 0.35rem;
+    align-items: baseline;
+  }
+
+  .resume.one-page-mode .entry-title {
+    font-size: 0.82rem;
+  }
+
+  .resume.one-page-mode .entry-org {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .resume.one-page-mode .entry-desc {
+    margin-top: 0.08rem;
+    line-height: 1.18;
+  }
+
+  .resume.one-page-mode .resume-main section:nth-of-type(1) .entry-list,
+  .resume.one-page-mode .resume-main section:nth-of-type(2) .entry-list,
+  .resume.one-page-mode .resume-main section:nth-of-type(3) .entry-list,
+  .resume.one-page-mode .resume-main section:nth-of-type(4) .entry-list {
+    margin-top: 0.05rem;
   }
 }

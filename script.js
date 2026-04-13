@@ -43,6 +43,11 @@ const lists = {
   certifications: document.getElementById("certificationList")
 };
 
+const grammar = {
+  button: document.getElementById("grammarBtn"),
+  status: document.getElementById("grammarStatus")
+};
+
 const defaults = {
   name: "Your Name",
   headline: "Your Role",
@@ -418,6 +423,103 @@ function printResume(onePage = false) {
   });
 }
 
+function setGrammarStatus(message, isError = false) {
+  if (!grammar.status) {
+    return;
+  }
+
+  grammar.status.textContent = message;
+  grammar.status.style.color = isError ? "#ad3127" : "var(--muted)";
+}
+
+function applyLanguageToolCorrections(source, matches) {
+  let output = source;
+
+  const sorted = [...matches].sort((a, b) => b.offset - a.offset);
+  sorted.forEach((match) => {
+    if (!Array.isArray(match.replacements) || !match.replacements.length) {
+      return;
+    }
+
+    const replacement = match.replacements[0].value;
+    output = `${output.slice(0, match.offset)}${replacement}${output.slice(match.offset + match.length)}`;
+  });
+
+  return output;
+}
+
+async function fixGrammarText(text) {
+  const payload = new URLSearchParams({
+    text,
+    language: "en-US"
+  });
+
+  const response = await fetch("https://api.languagetool.org/v2/check", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: payload.toString()
+  });
+
+  if (!response.ok) {
+    throw new Error("Grammar service unavailable");
+  }
+
+  const result = await response.json();
+  const matches = Array.isArray(result.matches) ? result.matches : [];
+  if (!matches.length) {
+    return text;
+  }
+
+  return applyLanguageToolCorrections(text, matches);
+}
+
+function getGrammarTargetField() {
+  const active = document.activeElement;
+  const isTextInput = active && active.tagName === "INPUT" && ["text", "search", "url", "email"].includes(active.type);
+  const isTextarea = active && active.tagName === "TEXTAREA";
+
+  if ((isTextInput || isTextarea) && !active.readOnly && !active.disabled) {
+    return active;
+  }
+
+  return fields.summary;
+}
+
+async function fixGrammarForTarget() {
+  const target = getGrammarTargetField();
+  const original = target.value.trim();
+
+  if (!original) {
+    setGrammarStatus("Type something first, then run grammar fix.");
+    return;
+  }
+
+  if (grammar.button) {
+    grammar.button.disabled = true;
+  }
+
+  setGrammarStatus("Checking grammar...");
+
+  try {
+    const corrected = await fixGrammarText(target.value);
+    if (corrected === target.value) {
+      setGrammarStatus("No grammar issues found.");
+    } else {
+      target.value = corrected;
+      target.dispatchEvent(new Event("input", { bubbles: true }));
+      setGrammarStatus("Grammar updated.");
+    }
+  } catch {
+    setGrammarStatus("Could not reach grammar service right now.", true);
+  } finally {
+    if (grammar.button) {
+      grammar.button.disabled = false;
+    }
+  }
+}
+
 document.getElementById("addExperience").addEventListener("click", () => addCard("experience"));
 document.getElementById("addEducation").addEventListener("click", () => addCard("education"));
 document.getElementById("addProject").addEventListener("click", () => addCard("projects"));
@@ -426,6 +528,16 @@ document.getElementById("addCertification").addEventListener("click", () => addC
 document.getElementById("downloadBtn").addEventListener("click", () => printResume(false));
 document.getElementById("onePageBtn").addEventListener("click", () => printResume(true));
 document.getElementById("clearBtn").addEventListener("click", resetAll);
+if (grammar.button) {
+  grammar.button.addEventListener("click", fixGrammarForTarget);
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "g") {
+    event.preventDefault();
+    fixGrammarForTarget();
+  }
+});
 
 window.addEventListener("afterprint", () => {
   resumeEl.classList.remove("one-page-mode");
