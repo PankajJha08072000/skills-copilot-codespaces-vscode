@@ -162,7 +162,7 @@ function renderEntries(target, entries, emptyText) {
 
   if (!useful.length) {
     const p = document.createElement("p");
-    p.className = "entry-desc";
+    p.className = "entry-desc entry-empty";
     p.textContent = emptyText;
     target.appendChild(p);
     return;
@@ -220,7 +220,9 @@ function syncPreview() {
   preview.phone.textContent = fields.phone.value.trim() || defaults.phone;
   preview.location.textContent = fields.location.value.trim() || defaults.location;
   preview.website.textContent = fields.website.value.trim() || defaults.website;
-  preview.summary.textContent = fields.summary.value.trim() || defaults.summary;
+  const summaryValue = fields.summary.value.trim();
+  preview.summary.textContent = summaryValue || defaults.summary;
+  preview.summary.classList.toggle("is-placeholder", !summaryValue);
 
   const skillTokens = fields.skills.value
     .split(",")
@@ -230,6 +232,7 @@ function syncPreview() {
   preview.skills.innerHTML = "";
   if (!skillTokens.length) {
     const fallback = document.createElement("li");
+    fallback.className = "skill-empty";
     fallback.textContent = "Your skills";
     preview.skills.appendChild(fallback);
   } else {
@@ -411,16 +414,24 @@ function printResume(onePage = false) {
     resumeEl.classList.remove("one-page-mode");
   }
 
+  // Force style recalculation so one-page class is applied before opening print dialog.
+  void resumeEl.offsetHeight;
+
   const runPrint = () => {
     if (typeof window.print === "function") {
       window.print();
     }
   };
 
-  // Mobile browsers often need a short delay so layout classes are applied before opening print UI.
-  requestAnimationFrame(() => {
-    setTimeout(runPrint, 150);
-  });
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  // Mobile browsers can block print if it is not directly tied to the tap event.
+  if (isMobile) {
+    runPrint();
+    return;
+  }
+
+  requestAnimationFrame(runPrint);
 }
 
 function setGrammarStatus(message, isError = false) {
